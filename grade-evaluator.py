@@ -86,7 +86,7 @@ def evaluate_grades(data):
     # TODO: d) Determine Pass/Fail status (>= 50% in BOTH categories)
 
     #Calculating if passed 50%
-    if ((total_weighted_formative_score/60) * 100) >= 50 and ((total_weighted_summative_score/40) * 100) >= 50:
+    if ((total_weighted_formative_score/formative_weight) * 100) >= 50 and ((total_weighted_summative_score/summative_weight) * 100) >= 50:
         passed = True
     else:
         passed = False
