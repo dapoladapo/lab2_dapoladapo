@@ -45,33 +45,29 @@ def evaluate_grades(data):
         if assignment['score'] < 0 or assignment['score'] > 100:
             print (f"Error: {assignment['assignment']} has a false score not within the range 0-100.")
             sys.exit(1)
-        else:
-            continue
+
 
     # TODO: b) Validate total weights (Total=100, Summative=40, Formative=60)
-    validate_formative_score = 0
-    validate_summative_score = 0
+    formative_weight = 0
+    summative_weight = 0
     for assignment in data:
         #Sums up all the weights depending on their category
         if assignment['group'] == 'Formative':
-            validate_formative_score += assignment['weight']
+            formative_weight += assignment['weight']
         elif assignment['group'] == 'Summative':
-            validate_summative_score += assignment['weight']
+            summative_weight += assignment['weight']
         else:
             print (f"Error: {assignment['assignment']} has a false group. It must be a 'Formative' or 'Summative'.")
             sys.exit(1)
 
     #Validating the weights
-    if validate_formative_score != 60.0:
-        print (f"The sum of weights for each formative does not equal to 60. Please adjust values")
+    if formative_weight != 60.0:
+        print (f"The sum of weights for each formative does not add up to 60. Please adjust values")
         sys.exit(1)
-    elif validate_summative_score != 40.0:
-        print (f"The sum of weights for each formative does not equal to 40. Please adjust values")
+
+    if summative_weight != 40.0:
+        print (f"The sum of weights for each summative does not add up to 40. Please adjust values")
         sys.exit(1)
-    else:
-        Total_weight = validate_formative_score + validate_summative_score
-        if Total_weight != 100.0:
-            print (f"The total weight between formatives and summatives does not equal to 100")
 
     # TODO: c) Calculate the Final Grade and GPA
     #Getting the total weighted scores
@@ -81,15 +77,11 @@ def evaluate_grades(data):
     for assignment in data: 
         if assignment['group'] == 'Formative':
             total_weighted_formative_score += ((assignment['score'] * assignment['weight'])/100)
-        elif assignment['group'] == 'Summative':
+        else:
             total_weighted_summative_score += ((assignment['score'] * assignment['weight'])/100)
-        else: 
-            print (f"Error: {assignment['assignment']} has a false group. It must be Formative or Summative")
-            sys.exit(1)
 
     #calculation the number for each formative 
     GPA = (((total_weighted_formative_score + total_weighted_summative_score) / 100) * 5.0)
-    #print (f"Students GPA: {GPA}")
 
     # TODO: d) Determine Pass/Fail status (>= 50% in BOTH categories)
 
@@ -130,10 +122,10 @@ def evaluate_grades(data):
         print (f"Assignment: {assignment['assignment']} | Category: {assignment['group']} | Score: {assignment['score']} | Weight: {assignment['weight']}")
 
     print("\n ----- Evaluation results -----")
-    print(f"Formative: {total_weighted_formative_score}/{validate_formative_score} --- ({(total_weighted_formative_score / validate_formative_score) * 100}%)")
-    print(f"Summative: {total_weighted_summative_score}/{validate_summative_score} --- ({(total_weighted_summative_score / validate_summative_score)*100}%)")
+    print(f"Formative: {total_weighted_formative_score}/{formative_weight} --- ({(total_weighted_formative_score / formative_weight) * 100}%)")
+    print(f"Summative: {total_weighted_summative_score}/{summative_weight} --- ({(total_weighted_summative_score / summative_weight)*100}%)")
     print(f"GPA: {GPA}")
-    print(f"Status: {'Passed' if passed else 'Failed'}")
+    print(f"Status: {'PASSED' if passed else 'FAILED'}")
 
     if resubmit_formative:
         print("These are the assignments available for resubmission")
