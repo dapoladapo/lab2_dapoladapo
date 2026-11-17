@@ -7,29 +7,94 @@ def load_csv_data():
     Prompts the user for a filename, checks if it exists, 
     and extracts all fields into a list of dictionaries.
     """
-    filename = input("Enter the name of the CSV file to process (e.g., grades.csv): ")
-    
+    filename = input("Enter the name of the CSV file to process (e.g., grades.csv): ").strip()
+
+    #Checks if user typed anything
+    if filename == "":
+            print("Error: No File Entered. Please enter the name of the CSV File")
+            sys.exit(1)
+
+    #Checks if filename exists
     if not os.path.exists(filename):
         print(f"Error: The file '{filename}' was not found.")
         sys.exit(1)
-        
+
+    #Checks if filename is a file
+    if not os.path.isfile(filename):
+        print(f"Error: The file '{filename}' is not a file")
+        sys.exit(1)
+
+    #Checks if the filename file has anything inside
+    if os.path.getsize(filename) == 0:
+        print(f"Error: '{filename} file is empty. Please add the required information")
+        sys.exit(1)
+
     assignments = []
     
     try:
         with open(filename, mode='r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
+
+            #Check if the file has header row
+            if reader.fieldnames is None:
+                print(f"Error: '{filename}' does not have a header")
+                sys.exit(1)
+
+            #Makes sure all headers are lowercase
+            clean_names = []
+            for name in reader.fieldnames:
+                clean_names.append((name or '').strip().lower())
+            reader.fieldnames = clean_names
+
+            #Makes sure the columns are not missing
+            required_columns = ['assignment', 'group', 'score', 'weight']
+            missing_columns = []
+
+            for column in required_columns:
+                if column not in reader.fieldnames:
+                    missing_columns.append(column)
+
+            if missing_columns:
+                print(f"Error: Missing the required columns {missing_columns}\n Expected headers: {required_columns}")
+                sys.exit(1)
+
+
+            #Skips empty rows
             for row in reader:
-                # Convert numeric fields to floats for calculations
-                assignments.append({
-                    'assignment': row['assignment'],
-                    'group': row['group'],
-                    'score': float(row['score']),
-                    'weight': float(row['weight'])
-                })
+                if not any(row.values()):
+                    continue
+                try:
+                    #Checks invalid data types or missing values
+                    # Convert numeric fields to floats for calculations
+                    assignments.append({
+                        'assignment': row['assignment'].strip(),
+                        'group': row['group'].strip().capitalize(),
+                        'score': float(row['score']),
+                        'weight': float(row['weight'])
+                    })
+                except (ValueError, TypeError, AttributeError):
+                    print(f"Error: {reader.line_num} line must have the score and weight as a number and no field must be empty")
+                    sys.exit(1)
+
+        if len(assignments) == 0:
+                print(f"Error: '{filename}' file does not have a grade data. ")
+                sys.exit(1)
+
         return assignments
-    except Exception as e:
-        print(f"An error occurred while reading the file: {e}")
+
+    except PermissionError:
+        print(f"You do not have permission to read '{filename}' file")
         sys.exit(1)
+
+    except UnicodeDecodeError:
+        print(f"'{filename}' file is not a CSV file")
+        sys.exit(1)
+
+    except Exception as e:
+        print(f"You have an error: {e}")
+        sys.exit(1)
+
+
 
 
 
